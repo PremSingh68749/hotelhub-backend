@@ -87,4 +87,12 @@ export class ConfigService {
       maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
     };
   }
+
+  get cloudinaryConfig() {
+    return {
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: process.env.CLOUDINARY_API_KEY,
+      apiSecret: process.env.CLOUDINARY_API_SECRET,
+    };
+  }
 }

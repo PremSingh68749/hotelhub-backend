@@ -55,7 +55,7 @@ export class CreateHotelWithUrlsInput {
   website?: string;
 
   @Field()
-  @IsDecimal()
+  @IsNumber()
   @IsOptional()
   @Min(0)
   @Max(5)

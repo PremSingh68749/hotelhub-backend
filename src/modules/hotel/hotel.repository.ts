@@ -38,7 +38,18 @@ export class HotelRepository {
    * @returns Hotel or null
    */
   async findById(id: number): Promise<Hotel | null> {
-    return await this.hotelModel.findByPk(id);
+    return await this.hotelModel.findByPk(id, {
+      include: [
+        {
+          association: 'images',
+          order: [['sortOrder', 'ASC'], ['createdAt', 'ASC']]
+        },
+        {
+          association: 'roomTypes',
+          include: ['rooms']
+        }
+      ]
+    });
   }
 
   /**

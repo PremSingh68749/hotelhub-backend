@@ -90,6 +90,7 @@ export class HotelResolver {
     name: 'hotelsByOwner',
     description: 'Get hotels by owner ID with pagination'
   })
+  @UseGuards(GqlAuthGuard)
   async getHotelsByOwner(
     @Args('limit', { type: () => Int, nullable: true, defaultValue: 10 }) limit: number,
     @Args('offset', { type: () => Int, nullable: true, defaultValue: 0 }) offset: number,

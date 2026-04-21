@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
-import { CLOUDINARY_CONFIG, CLOUDINARY_FOLDERS, UPLOAD_CONFIG } from '../constants/cloudinary.constant';
+import { CLOUDINARY_FOLDERS, UPLOAD_CONFIG } from '../constants/cloudinary.constant';
+import { ConfigService } from '../config/config.service';
 
 interface FileUploadOptions {
   transformation?: any;
@@ -16,11 +17,19 @@ interface UploadResult {
 
 @Injectable()
 export class FileUploadService {
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
+    const cloudinaryConfig = this.configService.cloudinaryConfig;
+    
+    console.log('Cloudinary config:', {
+      cloudName: cloudinaryConfig.cloudName,
+      apiKey: cloudinaryConfig.apiKey ? '***CONFIGURED***' : '***MISSING***',
+      apiSecret: cloudinaryConfig.apiSecret ? '***CONFIGURED***' : '***MISSING***',
+    });
+    
     cloudinary.config({
-      cloud_name: CLOUDINARY_CONFIG.cloudName,
-      api_key: CLOUDINARY_CONFIG.apiKey,
-      api_secret: CLOUDINARY_CONFIG.apiSecret,
+      cloud_name: cloudinaryConfig.cloudName,
+      api_key: cloudinaryConfig.apiKey,
+      api_secret: cloudinaryConfig.apiSecret,
     });
   }
 
@@ -29,6 +38,15 @@ export class FileUploadService {
     folder: keyof typeof CLOUDINARY_FOLDERS,
     options?: FileUploadOptions
   ): Promise<UploadResult> {
+    console.log('File object received:', {
+      hasFile: !!file,
+      fileKeys: file ? Object.keys(file) : 'null',
+      originalname: file?.originalname,
+      size: file?.size,
+      path: file?.path,
+      buffer: file?.buffer ? 'has buffer' : 'no buffer'
+    });
+
     if (!file) {
       throw new BadRequestException('No file provided');
     }
@@ -48,7 +66,20 @@ export class FileUploadService {
 
     try {
       const folderPath = CLOUDINARY_FOLDERS[folder];
-      const result = await cloudinary.uploader.upload(file.path, {
+      
+      // For Cloudinary, we need to use the buffer with proper data URI format
+      let uploadData;
+      if (file.buffer) {
+        uploadData = `data:image/${fileExtension};base64,${file.buffer.toString('base64')}`;
+        console.log('Using buffer for upload');
+      } else if (file.path) {
+        uploadData = file.path;
+        console.log('Using path for upload');
+      } else {
+        throw new BadRequestException('No file data available for upload');
+      }
+      
+      const result = await cloudinary.uploader.upload(uploadData, {
         folder: folderPath,
         public_id: options?.publicId,
         resource_type: options?.resourceType || 'auto',
