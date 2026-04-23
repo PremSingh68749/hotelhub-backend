@@ -77,95 +77,11 @@ export class CreateHotelWithUrlsInput {
   @IsOptional()
   checkOutTime?: string;
 
-  @Field()
-  @IsBoolean()
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  hasParking?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWiFi?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasPool?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasGym?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasSpa?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasRestaurant?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBar?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasRoomService?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasMeetingRooms?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBusinessCenter?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasPetFriendly?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasAirportShuttle?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasConcierge?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  has24HourFrontDesk?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasHeating?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasElevator?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasDisabledAccess?: boolean;
+  amenities?: string[];
 
   @Field(() => MultipleImageUrlInput, { nullable: true })
   @IsOptional()
@@ -224,9 +140,9 @@ export class UpdateHotelWithUrlsInput {
   @IsString()
   website?: string;
 
-  @Field({ nullable: true })
+  @Field()
+  @IsNumber()
   @IsOptional()
-  @IsDecimal()
   @Min(0)
   @Max(5)
   rating?: number;
@@ -247,95 +163,11 @@ export class UpdateHotelWithUrlsInput {
   @IsString()
   checkOutTime?: string;
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  @IsBoolean()
-  hasParking?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasWiFi?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasPool?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasGym?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasSpa?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasRestaurant?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasBar?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasRoomService?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasMeetingRooms?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasBusinessCenter?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasPetFriendly?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasAirportShuttle?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasConcierge?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  has24HourFrontDesk?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasAirConditioning?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasHeating?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasElevator?: boolean;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  hasDisabledAccess?: boolean;
+  amenities?: string[];
 
   @Field(() => MultipleImageUrlInput, { nullable: true })
   @IsOptional()

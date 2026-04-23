@@ -23,14 +23,14 @@ export class HotelAmenity extends Model<HotelAmenity> {
   })
   name: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({
     type: DataType.TEXT,
     allowNull: true,
   })
   description?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({
     type: DataType.STRING,
     allowNull: true,

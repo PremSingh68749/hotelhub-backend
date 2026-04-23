@@ -11,6 +11,7 @@ import { Review } from './review.model';
 @Table({
   tableName: 'hotels',
   timestamps: true,
+  paranoid: true,
 })
 export class Hotel extends Model<Hotel> {
   @Field(() => ID)
@@ -214,6 +215,13 @@ export class Hotel extends Model<Hotel> {
     defaultValue: DataType.NOW,
   })
   updatedAt: Date;
+
+  @Field(() => Date, { nullable: true })
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  deletedAt?: Date;
 
   // Relationships
   @BelongsTo(() => User, { foreignKey: 'ownerId' })

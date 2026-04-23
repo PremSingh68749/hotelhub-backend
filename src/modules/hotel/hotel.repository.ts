@@ -38,7 +38,7 @@ export class HotelRepository {
    * @returns Hotel or null
    */
   async findById(id: number): Promise<Hotel | null> {
-    return await this.hotelModel.findByPk(id, {
+    const hotel = await this.hotelModel.findByPk(id, {
       include: [
         {
           association: 'images',
@@ -47,9 +47,54 @@ export class HotelRepository {
         {
           association: 'roomTypes',
           include: ['rooms']
+        },
+        {
+          model: HotelAmenity,
+          as: 'amenities',
+          required: false
         }
       ]
     });
+
+    // Ensure amenities is never null (GraphQL expects non-nullable array)
+    if (hotel && !hotel.amenities) {
+      hotel.amenities = [];
+    }
+
+    return hotel;
+  }
+
+  /**
+   * Find hotel by ID including soft-deleted records
+   *
+   * @param id - Hotel ID
+   * @returns Hotel or null (including soft-deleted)
+   */
+  async findByIdIncludingDeleted(id: number): Promise<Hotel | null> {
+    const hotel = await this.hotelModel.findByPk(id, {
+      paranoid: false,  // Include soft-deleted records
+      include: [
+        {
+          association: 'images',
+          order: [['sortOrder', 'ASC'], ['createdAt', 'ASC']]
+        },
+        {
+          association: 'roomTypes',
+          include: ['rooms']
+        },
+        {
+          model: HotelAmenity,
+          as: 'amenities',
+          required: false
+        }
+      ]
+    });
+
+    if (hotel && !hotel.amenities) {
+      hotel.amenities = [];
+    }
+
+    return hotel;
   }
 
   /**
@@ -67,7 +112,7 @@ export class HotelRepository {
    * @returns Array of hotels
    */
   async findByOwnerId(ownerId: number, limit: number = 10, offset: number = 0): Promise<Hotel[]> {
-    return await this.hotelModel.findAll({
+    const hotels = await this.hotelModel.findAll({
       where: { ownerId },
       order: [['createdAt', 'DESC']],
       limit,
@@ -88,9 +133,23 @@ export class HotelRepository {
               attributes: ['id'] // Only count the rooms, don't need all room data
             }
           ]
+        },
+        {
+          model: HotelAmenity,
+          as: 'amenities',
+          required: false
         }
       ]
     });
+
+    // Ensure amenities is never null for each hotel
+    hotels.forEach(hotel => {
+      if (!hotel.amenities) {
+        hotel.amenities = [];
+      }
+    });
+
+    return hotels;
   }
 
   /**

@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { GraphQLError } from 'graphql';
 import { Hotel } from '../../database/models/hotel.model';
 import { HotelImage } from '../../database/models/hotel-image.model';
+import { HotelAmenity } from '../../database/models/hotel-amenity.model';
 import { HotelRepository } from './hotel.repository';
 import { SearchHotelsInput } from './dto/hotel.input';
 import { CreateHotelWithUrlsInput, UpdateHotelWithUrlsInput } from './dto/hotel-with-urls.input';
+import { DeleteHotelResponse } from './dto/delete-hotel.response';
 
 /**
  * Hotel Service - Handles all hotel business logic and GraphQL error handling
@@ -14,6 +16,8 @@ import { CreateHotelWithUrlsInput, UpdateHotelWithUrlsInput } from './dto/hotel-
  */
 @Injectable()
 export class HotelService {
+  private readonly logger = new Logger(HotelService.name);
+
   constructor(private readonly hotelRepository: HotelRepository) {}
 
   /**
@@ -252,13 +256,13 @@ export class HotelService {
   }
 
   /**
-   * Delete hotel
-   * 
+   * Delete hotel (soft delete)
+   *
    * @param id - Hotel ID
    * @param ownerId - Owner ID for authorization
-   * @returns Success message
+   * @returns DeleteHotelResponse with success, message, and deleted hotel
    */
-  async delete(id: number, ownerId: number): Promise<{ success: boolean; message: string }> {
+  async delete(id: number, ownerId: number): Promise<DeleteHotelResponse> {
     try {
       // Validate ID
       if (!id || id <= 0) {
@@ -269,7 +273,7 @@ export class HotelService {
           }
         });
       }
-      
+
       // Validate owner ID
       if (!ownerId || ownerId <= 0) {
         throw new GraphQLError('Invalid owner ID provided', {
@@ -279,7 +283,7 @@ export class HotelService {
           }
         });
       }
-      
+
       // Check if hotel exists and belongs to owner
       const existingHotel = await this.hotelRepository.findById(id);
       if (!existingHotel) {
@@ -290,25 +294,31 @@ export class HotelService {
         });
       }
 
-      if (existingHotel.ownerId !== ownerId) {
+      if (existingHotel.ownerId != ownerId) {
         throw new GraphQLError('You can only delete your own hotels', {
           extensions: {
             code: 'FORBIDDEN'
           }
         });
       }
-      
+
+      // Soft delete the hotel (sets deletedAt timestamp)
       await this.hotelRepository.delete(id);
+
+      // Get the deleted hotel (will have deletedAt populated)
+      const deletedHotel = await this.hotelRepository.findByIdIncludingDeleted(id);
+
       return {
         success: true,
-        message: 'Hotel deleted successfully'
+        message: 'Hotel deleted successfully',
+        hotel: deletedHotel as Hotel,
       };
     } catch (error) {
       // Re-throw GraphQL errors
       if (error instanceof GraphQLError) {
         throw error;
       }
-      
+
       // Handle unknown errors
       throw new GraphQLError('Failed to delete hotel', {
         extensions: {
@@ -433,29 +443,44 @@ export class HotelService {
    */
   async createWithUrls(input: CreateHotelWithUrlsInput, userId: number): Promise<Hotel> {
     try {
-      // Extract images from input
-      const { images, ...hotelData } = input;
+      // Extract images and amenities from input
+      const { images, amenities, ...hotelData } = input;
+
+      this.logger.debug(`Creating hotel with data: ${JSON.stringify({ ...hotelData, ownerId: userId })}`);
+      this.logger.debug(`Images: ${JSON.stringify(images)}, Amenities: ${JSON.stringify(amenities)}`);
 
       // Create the hotel first
       const hotel = await this.hotelRepository.create({ ...hotelData, ownerId: userId });
+      this.logger.debug(`Hotel created with id: ${hotel.id}`);
 
       // If images are provided, create hotel image records
       if (images && images.images && images.images.length > 0) {
+        this.logger.debug(`Creating ${images.images.length} images for hotel ${hotel.id}`);
         await this.createHotelImages(hotel.id, images.images);
       }
 
-      // Return the complete hotel with images
+      // If amenities are provided, create hotel amenity records
+      if (amenities && amenities.length > 0) {
+        this.logger.debug(`Creating ${amenities.length} amenities for hotel ${hotel.id}`);
+        await this.createHotelAmenities(hotel.id, amenities);
+      }
+
+      // Return the complete hotel with images and amenities
       return await this.hotelRepository.findById(hotel.id);
     } catch (error) {
       // Re-throw GraphQL errors
       if (error instanceof GraphQLError) {
         throw error;
       }
-      
+
+      // Log the actual error for debugging
+      this.logger.error('Failed to create hotel with images:', error);
+
       // Handle unknown errors
-      throw new GraphQLError('Failed to create hotel with images', {
+      throw new GraphQLError(`Failed to create hotel: ${error.message}`, {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
+          originalError: error.message,
         },
       });
     }
@@ -491,8 +516,8 @@ export class HotelService {
         });
       }
 
-      // Extract image data from input
-      const { newImages, deleteImageIds, ...hotelData } = input;
+      // Extract image data and amenities from input
+      const { newImages, deleteImageIds, amenities, ...hotelData } = input;
 
       // Update hotel basic information
       await this.hotelRepository.update(id, hotelData);
@@ -500,14 +525,19 @@ export class HotelService {
       // Handle image updates
       await this.updateHotelImages(id, { newImages, deleteImageIds });
 
-      // Return the updated hotel with images
+      // Handle amenities upsert (if provided)
+      if (amenities !== undefined) {
+        await this.upsertHotelAmenities(id, amenities);
+      }
+
+      // Return the updated hotel with images and amenities
       return await this.hotelRepository.findById(id);
     } catch (error) {
       // Re-throw GraphQL errors
       if (error instanceof GraphQLError) {
         throw error;
       }
-      
+
       // Handle unknown errors
       throw new GraphQLError('Failed to update hotel with images', {
         extensions: {
@@ -574,7 +604,7 @@ export class HotelService {
 
   /**
    * Ensure only one primary image exists for the hotel
-   * 
+   *
    * @param hotelId - Hotel ID
    */
   private async ensureSinglePrimaryImage(hotelId: number): Promise<void> {
@@ -588,15 +618,68 @@ export class HotelService {
     if (primaryImages.length > 1) {
       // Keep the first one as primary, set others to false
       const [keepPrimary, ...others] = primaryImages;
-      
+
       await Promise.all(
-        others.map(image => 
+        others.map(image =>
           HotelImage.update(
             { isPrimary: false },
             { where: { id: image.id } }
           )
         )
       );
+    }
+  }
+
+  /**
+   * Create hotel amenity records from amenity names
+   *
+   * @param hotelId - Hotel ID
+   * @param amenities - Array of amenity names
+   */
+  private async createHotelAmenities(hotelId: number, amenities: string[]): Promise<void> {
+    // Filter out empty/null amenity names
+    const validAmenities = amenities
+      .filter((name): name is string => !!name && typeof name === 'string')
+      .map(name => name.trim())
+      .filter(name => name.length > 0);
+
+    if (validAmenities.length === 0) {
+      this.logger.warn(`No valid amenity names provided for hotel ${hotelId}`);
+      return;
+    }
+
+    try {
+      const amenityPromises = validAmenities.map(async (name) => {
+        return await HotelAmenity.create({
+          hotelId,
+          name,
+          isAvailable: true,
+        });
+      });
+
+      await Promise.all(amenityPromises);
+      this.logger.log(`Created ${validAmenities.length} amenities for hotel ${hotelId}`);
+    } catch (error) {
+      this.logger.error(`Failed to create amenities for hotel ${hotelId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Upsert hotel amenities - delete existing and insert new ones
+   *
+   * @param hotelId - Hotel ID
+   * @param amenities - Array of amenity names
+   */
+  private async upsertHotelAmenities(hotelId: number, amenities: string[]): Promise<void> {
+    // Delete existing amenities for this hotel
+    await HotelAmenity.destroy({
+      where: { hotelId },
+    });
+
+    // Insert new amenities if array is not empty
+    if (amenities.length > 0) {
+      await this.createHotelAmenities(hotelId, amenities);
     }
   }
 }

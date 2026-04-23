@@ -1,8 +1,10 @@
-import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int, Mutation, ResolveField, Parent } from '@nestjs/graphql';
 import { Hotel } from '../../database/models/hotel.model';
+import { HotelAmenity } from '../../database/models/hotel-amenity.model';
 import { HotelService } from './hotel.service';
 import { SearchHotelsInput } from './dto/hotel.input';
 import { CreateHotelWithUrlsInput, UpdateHotelWithUrlsInput } from './dto/hotel-with-urls.input';
+import { DeleteHotelResponse } from './dto/delete-hotel.response';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/common/guards/auth.guard';
 import { AuthUser } from 'src/common/decorators/user.decorator';
@@ -18,6 +20,16 @@ import { UserTokenPayload } from 'src/common/constants/app.constant';
 @Resolver(() => Hotel)
 export class HotelResolver {
   constructor(private readonly hotelService: HotelService) {}
+
+  /**
+   * Field resolver for amenities - ensures non-null array
+   * @param hotel - Parent hotel object
+   * @returns Array of amenities or empty array
+   */
+  @ResolveField(() => [HotelAmenity])
+  amenities(@Parent() hotel: Hotel): HotelAmenity[] {
+    return hotel.amenities || [];
+  }
 
   /**
    * Get a specific hotel by its ID
@@ -114,21 +126,22 @@ export class HotelResolver {
   }
 
   /**
-   * Delete a hotel
-   * 
+   * Delete a hotel (soft delete)
+   *
    * @param id - Hotel ID
-   * @param ownerId - Owner ID for authorization
-   * @returns Success message
+   * @param user - Authenticated user
+   * @returns Delete response with success, message, and deleted hotel
    */
-  @Mutation(() => Hotel, { 
+  @Mutation(() => DeleteHotelResponse, {
     name: 'deleteHotel',
-    description: 'Delete a hotel'
+    description: 'Delete a hotel (soft delete)'
   })
+  @UseGuards(GqlAuthGuard)
   async deleteHotel(
     @Args('id', { type: () => Int }) id: number,
-    @Args('ownerId', { type: () => Int }) ownerId: number
-  ): Promise<{ success: boolean; message: string }> {
-    return this.hotelService.delete(id, ownerId);
+    @AuthUser() user: UserTokenPayload
+  ): Promise<DeleteHotelResponse> {
+    return this.hotelService.delete(id, user.sub);
   }
 
   /**
