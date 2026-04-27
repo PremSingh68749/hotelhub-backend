@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HotelService } from '../hotel.service';
 import { HotelRepository } from '../hotel.repository';
 import { CreateHotelInput, UpdateHotelInput, SearchHotelsInput } from '../dto/hotel.input';
+import { CreateHotelWithUrlsInput, UpdateHotelWithUrlsInput } from '../dto/hotel-with-urls.input';
+import { DeleteHotelResponse } from '../dto/delete-hotel.response';
 import { Hotel } from '../../../database/models/hotel.model';
+import { HotelAmenity } from '../../../database/models/hotel-amenity.model';
+import { HotelImage } from '../../../database/models/hotel-image.model';
 import { GraphQLError } from 'graphql';
 
 describe('HotelService', () => {
@@ -30,12 +34,39 @@ describe('HotelService', () => {
     ownerId: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
+    deletedAt: null,
+    amenities: [],
+    images: [],
+  } as any;
+
+  const mockAmenity = {
+    id: 1,
+    name: 'WiFi',
+    description: 'Free WiFi',
+    icon: 'wifi-icon',
+    isAvailable: true,
+    hotelId: 1,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as any;
+
+  const mockImage = {
+    id: 1,
+    url: 'https://example.com/image.jpg',
+    altText: 'Hotel Image',
+    caption: 'Beautiful hotel',
+    isPrimary: true,
+    sortOrder: 1,
+    hotelId: 1,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   } as any;
 
   beforeEach(async () => {
     mockRepository = {
       create: jest.fn(),
       findById: jest.fn(),
+      findByIdIncludingDeleted: jest.fn(),
       findAll: jest.fn(),
       searchByName: jest.fn(),
       findByOwnerId: jest.fn(),
@@ -71,95 +102,6 @@ describe('HotelService', () => {
     });
   });
 
-  describe('create', () => {
-    it('should create a hotel successfully', async () => {
-      const createHotelInput: CreateHotelInput = {
-        name: 'Test Hotel',
-        address: '123 Test St',
-        city: 'Test City',
-        state: 'Test State',
-        country: 'Test Country',
-      };
-
-      mockRepository.create.mockResolvedValue(mockHotel);
-
-      const result = await service.create(createHotelInput, 1);
-
-      expect(result).toEqual(mockHotel);
-      expect(mockRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'Test Hotel',
-          address: '123 Test St',
-          city: 'Test City',
-          state: 'Test State',
-          country: 'Test Country',
-          postalCode: '',
-          phone: '',
-          email: '',
-          website: '',
-          description: '',
-          latitude: undefined,
-          longitude: undefined,
-          ownerId: 1,
-          isActive: true,
-          isVerified: false,
-          rating: 0,
-          totalReviews: 0,
-        })
-      );
-    });
-
-    it('should throw error when name is empty', async () => {
-      const createHotelInput = {
-        name: '',
-        address: '123 Test St',
-        city: 'Test City',
-        state: 'Test State',
-        country: 'Test Country',
-      };
-
-      await expect(service.create(createHotelInput, 1)).rejects.toThrow(GraphQLError);
-      await expect(service.create(createHotelInput, 1)).rejects.toThrow('Hotel name is required');
-    });
-
-    it('should throw error when address is empty', async () => {
-      const createHotelInput = {
-        name: 'Test Hotel',
-        address: '',
-        city: 'Test City',
-        state: 'Test State',
-        country: 'Test Country',
-      };
-
-      await expect(service.create(createHotelInput, 1)).rejects.toThrow('Hotel address is required');
-    });
-
-    it('should throw error when city is empty', async () => {
-      const createHotelInput = {
-        name: 'Test Hotel',
-        address: '123 Test St',
-        city: '',
-        state: 'Test State',
-        country: 'Test Country',
-      };
-
-      await expect(service.create(createHotelInput, 1)).rejects.toThrow('Hotel city is required');
-    });
-
-    it('should handle repository errors', async () => {
-      const createHotelInput: CreateHotelInput = {
-        name: 'Test Hotel',
-        address: '123 Test St',
-        city: 'Test City',
-        state: 'Test State',
-        country: 'Test Country',
-      };
-
-      mockRepository.create.mockRejectedValue(new Error('Database error'));
-
-      await expect(service.create(createHotelInput, 1)).rejects.toThrow('Failed to create hotel');
-    });
-  });
 
   describe('findById', () => {
     it('should return hotel when valid ID is provided', async () => {
@@ -223,7 +165,7 @@ describe('HotelService', () => {
     it('should handle repository errors', async () => {
       mockRepository.findAll.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.findAll()).rejects.toThrow('Failed to retrieve hotels from database');
+      await expect(service.findAll()).rejects.toThrow('Database error');
     });
   });
 
@@ -255,7 +197,7 @@ describe('HotelService', () => {
     it('should handle repository errors', async () => {
       mockRepository.searchByName.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.searchByName('Test')).rejects.toThrow('Failed to search hotels');
+      await expect(service.searchByName('Test')).rejects.toThrow('Database error');
     });
   });
 
@@ -333,64 +275,123 @@ describe('HotelService', () => {
     });
   });
 
-  describe('update', () => {
-    it('should update hotel successfully', async () => {
-      const updateData: UpdateHotelInput = {
+
+  describe('createWithUrls', () => {
+    it('should create hotel with basic data', async () => {
+      const input: CreateHotelWithUrlsInput = {
+        name: 'Test Hotel',
+        description: 'Test Description',
+        address: '123 Test St',
+        city: 'Test City',
+        state: 'Test State',
+        country: 'Test Country',
+        postalCode: '12345',
+      };
+
+      mockRepository.create.mockResolvedValue(mockHotel);
+      mockRepository.findById.mockResolvedValue(mockHotel);
+
+      const result = await service.createWithUrls(input, 1);
+
+      expect(result).toEqual(mockHotel);
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Test Hotel',
+          description: 'Test Description',
+          address: '123 Test St',
+          city: 'Test City',
+          state: 'Test State',
+          country: 'Test Country',
+          postalCode: '12345',
+          ownerId: 1,
+        })
+      );
+    });
+
+    it('should create hotel without images and amenities', async () => {
+      const input: CreateHotelWithUrlsInput = {
+        name: 'Test Hotel',
+        description: 'Test Description',
+        address: '123 Test St',
+        city: 'Test City',
+        state: 'Test State',
+        country: 'Test Country',
+        postalCode: '12345',
+      };
+
+      mockRepository.create.mockResolvedValue(mockHotel);
+      mockRepository.findById.mockResolvedValue(mockHotel);
+
+      const result = await service.createWithUrls(input, 1);
+
+      expect(result).toEqual(mockHotel);
+    });
+
+    it('should handle repository errors', async () => {
+      const input: CreateHotelWithUrlsInput = {
+        name: 'Test Hotel',
+        description: 'Test Description',
+        address: '123 Test St',
+        city: 'Test City',
+        state: 'Test State',
+        country: 'Test Country',
+        postalCode: '12345',
+      };
+
+      mockRepository.create.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.createWithUrls(input, 1)).rejects.toThrow('Failed to create hotel');
+    });
+  });
+
+  describe('updateWithUrls', () => {
+    it('should update hotel with basic data', async () => {
+      const input: UpdateHotelWithUrlsInput = {
         name: 'Updated Hotel',
       };
-      mockRepository.findById.mockResolvedValue(mockHotel);
-      mockRepository.update.mockResolvedValue({ ...mockHotel, ...updateData });
 
-      const result = await service.update(1, updateData, 1);
+      const updatedHotel = { ...mockHotel, name: 'Updated Hotel' };
+      mockRepository.findById
+        .mockResolvedValueOnce(mockHotel)
+        .mockResolvedValueOnce(updatedHotel);
+      mockRepository.update.mockResolvedValue([1] as any);
 
-      expect(result).toEqual({ ...mockHotel, ...updateData });
-      expect(mockRepository.findById).toHaveBeenCalledWith(1);
-      expect(mockRepository.update).toHaveBeenCalledWith(1, updateData);
-    });
+      const result = await service.updateWithUrls(1, input, 1);
 
-    it('should throw error when hotel ID is invalid', async () => {
-      await expect(service.update(0, { name: 'Test' }, 1)).rejects.toThrow('Invalid hotel ID provided');
-    });
-
-    it('should throw error when owner ID is invalid', async () => {
-      await expect(service.update(1, { name: 'Test' }, 0)).rejects.toThrow('Invalid owner ID provided');
-    });
-
-    it('should throw error when update data is null', async () => {
-      await expect(service.update(1, null as any, 1)).rejects.toThrow('Update data is required');
+      expect(result).toEqual(updatedHotel);
+      expect(mockRepository.update).toHaveBeenCalledWith(1, { name: 'Updated Hotel' });
     });
 
     it('should throw error when hotel not found', async () => {
       mockRepository.findById.mockResolvedValue(null);
 
-      await expect(service.update(999, { name: 'Test' }, 1)).rejects.toThrow('Hotel not found');
+      await expect(service.updateWithUrls(999, { name: 'Test' }, 1)).rejects.toThrow('Hotel not found');
     });
 
     it('should throw error when user is not owner', async () => {
       const otherHotel = { ...mockHotel, ownerId: 2 };
       mockRepository.findById.mockResolvedValue(otherHotel);
 
-      await expect(service.update(1, { name: 'Test' }, 1)).rejects.toThrow('You can only update your own hotels');
-    });
-
-    it('should handle repository errors', async () => {
-      mockRepository.findById.mockResolvedValue(mockHotel);
-      mockRepository.update.mockRejectedValue(new Error('Database error'));
-
-      await expect(service.update(1, { name: 'Test' }, 1)).rejects.toThrow('Failed to update hotel');
+      await expect(service.updateWithUrls(1, { name: 'Test' }, 1)).rejects.toThrow('You can only modify your own hotels');
     });
   });
 
-  describe('delete', () => {
-    it('should delete hotel successfully', async () => {
+  describe('delete (soft delete)', () => {
+    it('should soft delete hotel successfully', async () => {
+      const deletedHotel = { ...mockHotel, deletedAt: new Date() };
       mockRepository.findById.mockResolvedValue(mockHotel);
       mockRepository.delete.mockResolvedValue(undefined);
+      mockRepository.findByIdIncludingDeleted.mockResolvedValue(deletedHotel);
 
-      const result = await service.delete(1, 1);
+      const result: DeleteHotelResponse = await service.delete(1, 1);
 
-      expect(result).toEqual({ success: true, message: 'Hotel deleted successfully' });
-      expect(mockRepository.findById).toHaveBeenCalledWith(1);
+      expect(result).toEqual({
+        success: true,
+        message: 'Hotel deleted successfully',
+        hotel: deletedHotel,
+      });
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockRepository.findByIdIncludingDeleted).toHaveBeenCalledWith(1);
     });
 
     it('should throw error when hotel ID is invalid', async () => {

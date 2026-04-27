@@ -211,6 +211,7 @@ describe('AuthService', () => {
       expect(result).toEqual({
         success: true,
         token: 'mock-token',
+        user: mockUser,
       });
       expect(mockUserService.findByEmail).toHaveBeenCalledWith('test@example.com');
       expect(mockJwtService.sign).toHaveBeenCalledWith(
@@ -356,6 +357,7 @@ describe('AuthService', () => {
         success: true,
         token: 'mock-token',
         message: 'OTP verified successfully',
+        user: mockUser,
       });
       expect(mockUserService.markEmailAsVerified).toHaveBeenCalledWith('test@example.com');
       expect(mockJwtService.sign).toHaveBeenCalledWith(
@@ -590,6 +592,7 @@ describe('AuthService', () => {
         success: true,
         token: 'mock-token',
         message: 'Password reset successful',
+        user: mockUser,
       });
       expect(mockUserService.update).toHaveBeenCalledWith(1, {
         password: expect.any(String),
