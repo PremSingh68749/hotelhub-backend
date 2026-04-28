@@ -28,12 +28,19 @@ export class RoomTypeWithImagesService {
       }
 
       // Create room type first
-      const { images, ...roomTypeData } = createRoomTypeInput;
+      const { imageUpload, amenities, images, ...roomTypeDataWithoutArrays } = createRoomTypeInput;
+      
+      const roomTypeData = {
+        ...roomTypeDataWithoutArrays,
+        amenities: amenities ? JSON.stringify(amenities) : null,
+        images: images ? JSON.stringify(images) : null
+      };
+      
       const roomType = await this.roomTypeRepository.create(roomTypeData);
 
       // Handle image uploads if provided
-      if (images && images.files && images.files.length > 0) {
-        await this.uploadRoomTypeImages(roomType.id, images.files, images.imageData);
+      if (imageUpload && imageUpload.files && imageUpload.files.length > 0) {
+        await this.uploadRoomTypeImages(roomType.id, imageUpload.files, imageUpload.imageData);
       }
 
       // Return room type with images
@@ -71,7 +78,14 @@ export class RoomTypeWithImagesService {
       }
 
       // Update room type data
-      const { newImages, deleteImageIds, ...roomTypeData } = updateRoomTypeInput;
+      const { newImages, deleteImageIds, amenities, images, ...roomTypeDataWithoutArrays } = updateRoomTypeInput;
+      
+      const roomTypeData = {
+        ...roomTypeDataWithoutArrays,
+        amenities: amenities ? JSON.stringify(amenities) : undefined,
+        images: images ? JSON.stringify(images) : undefined
+      };
+      
       const updatedRoomType = await this.roomTypeRepository.update(roomTypeId, roomTypeData);
       
       // Return room type with images

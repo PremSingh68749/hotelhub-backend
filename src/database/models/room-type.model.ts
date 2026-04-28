@@ -2,8 +2,6 @@ import { Column, Model, DataType, Table, HasMany, BelongsTo } from 'sequelize-ty
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { Hotel } from './hotel.model';
 import { Room } from './room.model';
-import { RoomTypeAmenity } from './room-type-amenity.model';
-import { RoomTypeImage } from './room-type-image.model';
 
 @ObjectType()
 @Table({
@@ -89,86 +87,6 @@ export class RoomType extends Model<RoomType> {
   @Column({
     type: DataType.BOOLEAN,
     allowNull: false,
-    defaultValue: false,
-  })
-  hasAirConditioning: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasHeating: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasPrivateBathroom: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasKitchen: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasBalcony: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasSeaView: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasMountainView: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasCityView: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  isSmokingAllowed: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  isPetFriendly: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
     defaultValue: true,
   })
   isActive: boolean;
@@ -213,9 +131,17 @@ export class RoomType extends Model<RoomType> {
   @HasMany(() => Room, { foreignKey: 'roomTypeId' })
   rooms: Room[];
 
-  @HasMany(() => RoomTypeAmenity, { foreignKey: 'roomTypeId' })
-  amenities: RoomTypeAmenity[];
+  @Field()
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  amenities?: string; // JSON string array of amenities
 
-  @HasMany(() => RoomTypeImage, { foreignKey: 'roomTypeId' })
-  images: RoomTypeImage[];
+  @Field()
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  images?: string; // JSON string array of image URLs
 }

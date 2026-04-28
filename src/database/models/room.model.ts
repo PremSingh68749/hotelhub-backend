@@ -3,7 +3,6 @@ import { Field, ObjectType, ID, registerEnumType } from '@nestjs/graphql';
 import { Hotel } from './hotel.model';
 import { RoomType } from './room-type.model';
 import { Booking } from './booking.model';
-import { RoomImage } from './room-image.model';
 
 export enum RoomStatus {
   AVAILABLE = 'AVAILABLE',
@@ -70,110 +69,6 @@ export class Room extends Model<Room> {
   })
   notes?: string;
 
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  isSmokingAllowed: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  isPetFriendly: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasMinibar: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasSafe: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasBalcony: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasBathtub: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasShower: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasKitchenette: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasWorkDesk: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasTV: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasWiFi: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasAirConditioning: boolean;
-
-  @Field()
-  @Column({
-    type: DataType.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  })
-  hasHeating: boolean;
-
   @Field(() => ID)
   @Column({
     type: DataType.INTEGER,
@@ -222,8 +117,12 @@ export class Room extends Model<Room> {
   @HasMany(() => Booking, { foreignKey: 'roomId' })
   bookings: Booking[];
 
-  @HasMany(() => RoomImage, { foreignKey: 'roomId' })
-  images: RoomImage[];
+  @Field()
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  images?: string; // JSON string array of image URLs
 }
 
 // Register enum with GraphQL

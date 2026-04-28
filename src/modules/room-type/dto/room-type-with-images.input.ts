@@ -11,7 +11,7 @@ export class CreateRoomTypeWithImagesInput extends CreateRoomTypeInput {
 
   @Field(() => MultipleImageUploadInput, { nullable: true })
   @IsOptional()
-  images?: MultipleImageUploadInput;
+  imageUpload?: MultipleImageUploadInput;
 }
 
 @InputType()

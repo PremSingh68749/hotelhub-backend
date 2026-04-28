@@ -2,6 +2,7 @@ import { Resolver, Query, Args, Int, Mutation } from '@nestjs/graphql';
 import { RoomType } from '../../database/models/room-type.model';
 import { RoomTypeService } from './room-type.service';
 import { CreateRoomTypeInput, UpdateRoomTypeInput, SearchRoomTypesInput } from './dto/room-type.input';
+import { DeleteRoomTypeResponse } from './dto/delete-room-type.response';
 
 @Resolver(() => RoomType)
 export class RoomTypeResolver {
@@ -42,11 +43,11 @@ export class RoomTypeResolver {
     return await this.roomTypeService.update(id, updateRoomTypeInput, hotelId);
   }
 
-  @Mutation(() => RoomType)
+  @Mutation(() => DeleteRoomTypeResponse)
   async deleteRoomType(
     @Args('id', { type: () => Int }) id: number,
     @Args('hotelId', { type: () => Int }) hotelId: number
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<DeleteRoomTypeResponse> {
     return await this.roomTypeService.delete(id, hotelId);
   }
 

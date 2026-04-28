@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, Min, Max, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, Min, Max, IsBoolean, IsArray } from 'class-validator';
 import { RoomStatus } from '../../../database/models/room.model';
 
 @InputType()
@@ -99,6 +99,12 @@ export class CreateRoomInput {
   @IsBoolean()
   @IsOptional()
   hasHeating?: boolean;
+
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  images?: string[];
 }
 
 @InputType()
@@ -198,6 +204,12 @@ export class UpdateRoomInput {
   @IsBoolean()
   @IsOptional()
   hasHeating?: boolean;
+
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  images?: string[];
 }
 
 @InputType()

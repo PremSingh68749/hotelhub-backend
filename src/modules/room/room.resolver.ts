@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { Room } from '../../database/models/room.model';
 import { RoomService } from './room.service';
 import { CreateRoomInput, UpdateRoomInput, SearchRoomsInput } from './dto/room.input';
+import { DeleteRoomResponse } from './dto/delete-room.response';
 import { GqlAuthGuard } from 'src/common/guards/auth.guard';
 import { AuthUser } from 'src/common/decorators/user.decorator';
 import { UserTokenPayload } from 'src/common/constants/app.constant';
@@ -59,13 +60,13 @@ export class RoomResolver {
     return await this.roomService.update(id, updateRoomInput, hotelId);
   }
 
-  @Mutation(() => Room)
+  @Mutation(() => DeleteRoomResponse)
   @UseGuards(GqlAuthGuard)
   async deleteRoom(
     @Args('id', { type: () => Int }) id: number,
     @Args('hotelId', { type: () => Int }) hotelId: number,
     @AuthUser() user: UserTokenPayload
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<DeleteRoomResponse> {
     return await this.roomService.delete(id, hotelId);
   }
 

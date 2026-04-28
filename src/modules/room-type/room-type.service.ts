@@ -47,12 +47,16 @@ export class RoomTypeService {
         });
       }
 
+      const { amenities, images, ...roomTypeDataWithoutArrays } = createRoomTypeInput;
+      
       const roomTypeData = {
-        ...createRoomTypeInput,
+        ...roomTypeDataWithoutArrays,
         name: createRoomTypeInput.name.trim(),
         description: createRoomTypeInput.description?.trim() || '',
         hotelId,
-        isActive: true
+        isActive: true,
+        amenities: createRoomTypeInput.amenities ? JSON.stringify(createRoomTypeInput.amenities) : null,
+        images: createRoomTypeInput.images ? JSON.stringify(createRoomTypeInput.images) : null
       };
 
       return await this.roomTypeRepository.create(roomTypeData);
@@ -147,10 +151,14 @@ export class RoomTypeService {
         throw new ForbiddenException('You can only update room types for your own hotels');
       }
 
+      const { amenities, images, ...updateDataWithoutArrays } = updateRoomTypeInput;
+      
       const updateData = {
-        ...updateRoomTypeInput,
+        ...updateDataWithoutArrays,
         name: updateRoomTypeInput.name?.trim() || existingRoomType.name,
-        description: updateRoomTypeInput.description?.trim() || existingRoomType.description
+        description: updateRoomTypeInput.description?.trim() || existingRoomType.description,
+        amenities: updateRoomTypeInput.amenities ? JSON.stringify(updateRoomTypeInput.amenities) : existingRoomType.amenities,
+        images: updateRoomTypeInput.images ? JSON.stringify(updateRoomTypeInput.images) : existingRoomType.images
       };
 
       return await this.roomTypeRepository.update(id, updateData);

@@ -50,11 +50,14 @@ export class RoomService {
         });
       }
 
+      const { images, ...roomDataWithoutImages } = createRoomInput;
+      
       const roomData = {
-        ...createRoomInput,
+        ...roomDataWithoutImages,
         roomNumber: createRoomInput.roomNumber.trim(),
         roomTypeId,
-        status: (createRoomInput.status as RoomStatus) || RoomStatus.AVAILABLE
+        status: (createRoomInput.status as RoomStatus) || RoomStatus.AVAILABLE,
+        images: createRoomInput.images ? JSON.stringify(createRoomInput.images) : null
       };
 
       return await this.roomRepository.create(roomData);
@@ -182,9 +185,12 @@ export class RoomService {
         }
       }
 
+      const { images, ...updateDataWithoutImages } = updateRoomInput;
+      
       const updateData = {
-        ...updateRoomInput,
-        roomNumber: updateRoomInput.roomNumber?.trim() || existingRoom.roomNumber
+        ...updateDataWithoutImages,
+        roomNumber: updateRoomInput.roomNumber?.trim() || existingRoom.roomNumber,
+        images: updateRoomInput.images ? JSON.stringify(updateRoomInput.images) : existingRoom.images
       };
 
       return await this.roomRepository.update(id, updateData);
