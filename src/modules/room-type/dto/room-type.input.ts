@@ -14,8 +14,9 @@ export class CreateRoomTypeInput {
   description?: string;
 
   @Field()
-  @IsDecimal()
+  @IsNumber()
   @IsNotEmpty()
+  @Min(0)
   basePrice: number;
 
   @Field()
@@ -51,66 +52,15 @@ export class CreateRoomTypeInput {
   bedType?: string;
 
   @Field()
-  @IsDecimal()
+  @IsNumber()
   @IsOptional()
-  @Min(10)
+  @Min(1)
   roomSize?: number;
 
-  @Field()
-  @IsBoolean()
+  @Field(() => String, { nullable: true })
+  @IsString()
   @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasHeating?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasPrivateBathroom?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasKitchen?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBalcony?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasSeaView?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasMountainView?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasCityView?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isSmokingAllowed?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isPetFriendly?: boolean;
-
-  @Field(() => [String], { nullable: true })
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  amenities?: string[];
+  amenities?: string;
 
   @Field(() => [String], { nullable: true })
   @IsArray()
@@ -132,7 +82,7 @@ export class UpdateRoomTypeInput {
   description?: string;
 
   @Field()
-  @IsDecimal()
+  @IsNumber()
   @IsOptional()
   basePrice?: number;
 
@@ -169,7 +119,7 @@ export class UpdateRoomTypeInput {
   bedType?: string;
 
   @Field()
-  @IsDecimal()
+  @IsNumber()
   @IsOptional()
   @Min(10)
   roomSize?: number;
@@ -177,63 +127,12 @@ export class UpdateRoomTypeInput {
   @Field()
   @IsBoolean()
   @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasHeating?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasPrivateBathroom?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasKitchen?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBalcony?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasSeaView?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasMountainView?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasCityView?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isSmokingAllowed?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isPetFriendly?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
   isActive?: boolean;
 
-  @Field(() => [String], { nullable: true })
-  @IsArray()
-  @IsString({ each: true })
+  @Field(() => String, { nullable: true })
+  @IsString()
   @IsOptional()
-  amenities?: string[];
+  amenities?: string;
 
   @Field(() => [String], { nullable: true })
   @IsArray()
@@ -282,31 +181,6 @@ export class SearchRoomTypesInput {
   @IsString()
   @IsOptional()
   amenities?: string[];
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasPrivateBathroom?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasKitchen?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBalcony?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isPetFriendly?: boolean;
 
   @Field()
   @IsBoolean()

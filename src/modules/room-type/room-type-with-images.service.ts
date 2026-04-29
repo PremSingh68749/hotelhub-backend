@@ -28,14 +28,16 @@ export class RoomTypeWithImagesService {
       }
 
       // Create room type first
-      const { imageUpload, amenities, images, ...roomTypeDataWithoutArrays } = createRoomTypeInput;
-      
+      const { imageUpload, amenities, images, maxAdults, maxChildren, ...roomTypeDataWithoutArrays } = createRoomTypeInput;
+
       const roomTypeData = {
         ...roomTypeDataWithoutArrays,
+        adults: maxAdults,
+        children: maxChildren ?? 0,
         amenities: amenities ? JSON.stringify(amenities) : null,
         images: images ? JSON.stringify(images) : null
       };
-      
+
       const roomType = await this.roomTypeRepository.create(roomTypeData);
 
       // Handle image uploads if provided
@@ -78,14 +80,21 @@ export class RoomTypeWithImagesService {
       }
 
       // Update room type data
-      const { newImages, deleteImageIds, amenities, images, ...roomTypeDataWithoutArrays } = updateRoomTypeInput;
-      
-      const roomTypeData = {
+      const { newImages, deleteImageIds, amenities, images, maxAdults, maxChildren, ...roomTypeDataWithoutArrays } = updateRoomTypeInput;
+
+      const roomTypeData: Partial<RoomType> = {
         ...roomTypeDataWithoutArrays,
         amenities: amenities ? JSON.stringify(amenities) : undefined,
         images: images ? JSON.stringify(images) : undefined
       };
-      
+
+      if (maxAdults !== undefined) {
+        roomTypeData.adults = maxAdults;
+      }
+      if (maxChildren !== undefined) {
+        roomTypeData.children = maxChildren;
+      }
+
       const updatedRoomType = await this.roomTypeRepository.update(roomTypeId, roomTypeData);
       
       // Return room type with images

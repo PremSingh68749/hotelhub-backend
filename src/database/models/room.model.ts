@@ -117,7 +117,7 @@ export class Room extends Model<Room> {
   @HasMany(() => Booking, { foreignKey: 'roomId' })
   bookings: Booking[];
 
-  @Field()
+  @Field({ nullable: true })
   @Column({
     type: DataType.TEXT,
     allowNull: true,

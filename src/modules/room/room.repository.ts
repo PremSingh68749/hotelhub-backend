@@ -156,24 +156,11 @@ export class RoomRepository {
     }
 
     if (searchInput.maxPrice !== undefined) {
-      whereConditions.customPrice = { 
+      whereConditions.customPrice = {
         ...whereConditions.customPrice,
-        [Op.lte]: searchInput.maxPrice 
+        [Op.lte]: searchInput.maxPrice
       };
     }
-
-    // Feature filters
-    const featureFields = [
-      'isSmokingAllowed', 'isPetFriendly', 'hasMinibar', 'hasSafe', 
-      'hasBalcony', 'hasBathtub', 'hasShower', 'hasKitchenette', 
-      'hasWorkDesk', 'hasTV', 'hasWiFi', 'hasAirConditioning', 'hasHeating'
-    ];
-
-    featureFields.forEach(field => {
-      if (searchInput[field] !== undefined) {
-        whereConditions[field] = searchInput[field];
-      }
-    });
 
     return await this.roomModel.findAll({
       where: whereConditions,

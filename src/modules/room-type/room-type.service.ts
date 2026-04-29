@@ -47,15 +47,17 @@ export class RoomTypeService {
         });
       }
 
-      const { amenities, images, ...roomTypeDataWithoutArrays } = createRoomTypeInput;
-      
+      const { amenities, images, maxAdults, maxChildren, ...roomTypeDataWithoutArrays } = createRoomTypeInput;
+
       const roomTypeData = {
         ...roomTypeDataWithoutArrays,
         name: createRoomTypeInput.name.trim(),
         description: createRoomTypeInput.description?.trim() || '',
         hotelId,
         isActive: true,
-        amenities: createRoomTypeInput.amenities ? JSON.stringify(createRoomTypeInput.amenities) : null,
+        adults: maxAdults,
+        children: maxChildren ?? 0,
+        amenities: createRoomTypeInput.amenities ? createRoomTypeInput.amenities : null,
         images: createRoomTypeInput.images ? JSON.stringify(createRoomTypeInput.images) : null
       };
 
@@ -140,6 +142,9 @@ export class RoomTypeService {
    * @throws GraphQLError - If update fails or unauthorized
    */
   async update(id: number, updateRoomTypeInput: UpdateRoomTypeInput, hotelId: number): Promise<RoomType> {
+    console.log('updateRoomTypeInput', updateRoomTypeInput);
+    console.log('hotelId', hotelId);
+    console.log('id', id);
     try {
       // Check if room type exists and belongs to hotel
       const existingRoomType = await this.roomTypeRepository.findById(id);
@@ -151,9 +156,9 @@ export class RoomTypeService {
         throw new ForbiddenException('You can only update room types for your own hotels');
       }
 
-      const { amenities, images, ...updateDataWithoutArrays } = updateRoomTypeInput;
-      
-      const updateData = {
+      const { amenities, images, maxAdults, maxChildren, ...updateDataWithoutArrays } = updateRoomTypeInput;
+
+      const updateData: Partial<RoomType> = {
         ...updateDataWithoutArrays,
         name: updateRoomTypeInput.name?.trim() || existingRoomType.name,
         description: updateRoomTypeInput.description?.trim() || existingRoomType.description,
@@ -161,8 +166,16 @@ export class RoomTypeService {
         images: updateRoomTypeInput.images ? JSON.stringify(updateRoomTypeInput.images) : existingRoomType.images
       };
 
+      if (maxAdults !== undefined) {
+        updateData.adults = maxAdults;
+      }
+      if (maxChildren !== undefined) {
+        updateData.children = maxChildren;
+      }
+
       return await this.roomTypeRepository.update(id, updateData);
     } catch (error) {
+      console.error('Error updating room type:', error);
       throw new GraphQLError('Failed to update room type', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR'

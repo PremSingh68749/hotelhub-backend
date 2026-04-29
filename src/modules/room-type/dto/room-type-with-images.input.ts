@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDecimal, IsEnum, Min, Max, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDecimal, IsEnum, Min, Max, IsArray } from 'class-validator';
 import { CreateRoomTypeInput, UpdateRoomTypeInput } from './room-type.input';
 import { MultipleImageUploadInput } from '../../../common/dto/image-upload.dto';
 

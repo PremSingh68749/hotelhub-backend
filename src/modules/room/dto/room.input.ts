@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, Min, Max, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, Min, Max, IsArray } from 'class-validator';
 import { RoomStatus } from '../../../database/models/room.model';
 
 @InputType()
@@ -34,71 +34,6 @@ export class CreateRoomInput {
   @IsOptional()
   @IsEnum(RoomStatus)
   status?: RoomStatus;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isSmokingAllowed?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isPetFriendly?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasMinibar?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasSafe?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBalcony?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBathtub?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasShower?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasKitchenette?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWorkDesk?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasTV?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWiFi?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasHeating?: boolean;
 
   @Field(() => [String], { nullable: true })
   @IsArray()
@@ -139,71 +74,6 @@ export class UpdateRoomInput {
   @IsOptional()
   @IsEnum(RoomStatus)
   status?: RoomStatus;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isSmokingAllowed?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isPetFriendly?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasMinibar?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasSafe?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBalcony?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBathtub?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasShower?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasKitchenette?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWorkDesk?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasTV?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWiFi?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasHeating?: boolean;
 
   @Field(() => [String], { nullable: true })
   @IsArray()
@@ -250,71 +120,6 @@ export class SearchRoomsInput {
   @IsOptional()
   @Min(0)
   maxPrice?: number;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isSmokingAllowed?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  isPetFriendly?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasMinibar?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasSafe?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBalcony?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasBathtub?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasShower?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasKitchenette?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWorkDesk?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasTV?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasWiFi?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasAirConditioning?: boolean;
-
-  @Field()
-  @IsBoolean()
-  @IsOptional()
-  hasHeating?: boolean;
 
   @Field()
   @IsNumber()

@@ -131,14 +131,14 @@ export class RoomType extends Model<RoomType> {
   @HasMany(() => Room, { foreignKey: 'roomTypeId' })
   rooms: Room[];
 
-  @Field()
+  @Field({ nullable: true })
   @Column({
     type: DataType.TEXT,
     allowNull: true,
   })
   amenities?: string; // JSON string array of amenities
 
-  @Field()
+  @Field({ nullable: true })
   @Column({
     type: DataType.TEXT,
     allowNull: true,
